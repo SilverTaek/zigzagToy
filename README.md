@@ -1,15 +1,7 @@
-# zigzagToy
-zigzagToy Project for NestJs
+# Backend Onboarding
+Backend Onboarding Project
 
 ## 기술 스택
-
-### Frontend
-
-| Name             | Version |
-| ---------------- | ------- |
-| Vue              | latest  |
-| TypeScript       | latest  |
-
 
 ### Backend
 
@@ -18,16 +10,9 @@ zigzagToy Project for NestJs
 | TypeScript  | latest  |
 | Mysql       | latest  |
 | Node.js     | latest  |
+| Express      | latest  |
 | NestJS      | latest  |
 | GrapQL      | latest  |
 | Jest        | latest  |
-| CORMO       | latest  |
+| typeORM       | latest  |
 
-
-### Infra
-
-- AWS
-- Kubernates
-- GitHub Actions
-- NginX
-- Docker
