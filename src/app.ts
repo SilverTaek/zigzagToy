@@ -1,12 +1,15 @@
 import express, { NextFunction, Request, Response } from 'express';
 import morgan from 'morgan';
 import helmet from 'helmet';
+import todosRouter from './router/todos';
 
 const app = express();
 
 app.use(express());
 app.use(morgan('tiny'));
 app.use(helmet());
+
+app.use('/api/v1/todos', todosRouter);
 
 app.use((req: Request, res:Response, next: NextFunction) => {
     res.sendStatus(404);
