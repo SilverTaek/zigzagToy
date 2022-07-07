@@ -8,9 +8,18 @@ export class RequestTodoDto {
   private deadline: string;
   private date_created: Date;
   private date_updated: Date;
+  private date_completed: Date;
 
   toTodoEntity() {
-    return Todo.from(this.title, this.status, this.priority, this.deadline, this.date_created, this.date_updated);
+    return Todo.from(
+      this.title,
+      this.status,
+      this.priority,
+      this.deadline,
+      this.date_created,
+      this.date_updated,
+      this.date_completed,
+    );
   }
 
   static from(req: Request) {

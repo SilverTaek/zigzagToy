@@ -5,13 +5,13 @@ export class Todo {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ nullable: false })
   title: string;
 
-  @Column()
+  @Column({ nullable: false })
   status: string;
 
-  @Column()
+  @Column({ nullable: false })
   priority: number;
 
   @Column({ nullable: true })
@@ -33,6 +33,7 @@ export class Todo {
     deadline: string,
     date_created: Date,
     date_updated: Date,
+    date_completed: Date,
   ) {
     const todo = new Todo();
     todo.title = title;
@@ -41,6 +42,7 @@ export class Todo {
     todo.deadline = new Date(deadline);
     todo.date_created = date_created;
     todo.date_updated = date_updated;
+    todo.date_completed = date_completed;
     return todo;
   }
 }

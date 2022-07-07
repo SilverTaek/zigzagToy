@@ -14,6 +14,6 @@ createConnection(connectionOptions)
 
     app.use('/todos', todoRoutes);
 
-    app.listen(8000, () => console.log('App is running at port 8080.'));
+    app.listen(8080, () => console.log('App is running ...!'));
   })
   .catch((error) => console.log(error));
