@@ -3,8 +3,8 @@ import { createConnection } from 'typeorm';
 import * as express from 'express';
 import * as BodyParser from 'body-parser';
 import * as cors from 'cors';
-import todoRoutes from './routes/todoRoutes';
-import connectionOptions from './db/ormconfig';
+import todoRoutes from './routes/TodoRoutes';
+import connectionOptions from './common/config/environment';
 
 createConnection(connectionOptions)
   .then(async () => {

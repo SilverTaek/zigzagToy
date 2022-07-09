@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity()
 export class Todo {
@@ -8,7 +8,7 @@ export class Todo {
   @Column({ nullable: false })
   title: string;
 
-  @Column({ nullable: false })
+  @Column({ nullable: false, default: 'TODO' })
   status: string;
 
   @Column({ nullable: false })
@@ -17,32 +17,32 @@ export class Todo {
   @Column({ nullable: true })
   deadline: Date;
 
-  @Column()
+  @CreateDateColumn({
+    nullable: true,
+    type: 'timestamp',
+  })
   date_created: Date;
 
-  @Column()
+  @UpdateDateColumn({
+    nullable: false,
+    type: 'timestamp',
+  })
   date_updated: Date;
 
-  @Column({ nullable: true })
+  @Column()
   date_completed: Date;
 
-  static from(
-    title: string,
-    status: string,
-    priority: number,
-    deadline: string,
-    date_created: Date,
-    date_updated: Date,
-    date_completed: Date,
-  ) {
+  static from(title: string, status: string, priority: number, deadline: string, date_completed: Date) {
     const todo = new Todo();
     todo.title = title;
     todo.status = status;
     todo.priority = priority;
     todo.deadline = new Date(deadline);
-    todo.date_created = date_created;
-    todo.date_updated = date_updated;
     todo.date_completed = date_completed;
     return todo;
+  }
+
+  autoUpdateDate(): void {
+    this.date_updated = new Date();
   }
 }
