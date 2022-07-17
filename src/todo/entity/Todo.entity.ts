@@ -5,8 +5,8 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from "typeorm";
-import { TodoStatus } from "../../common/Todo.enum";
-import { RequestTodoDto } from "../dto/RequestTodoDto";
+import { TodoStatus } from "../../enum/Todo.enum";
+import { UpdateTodoDto } from "../dto/RequestUpdateTodoDto";
 
 @Entity()
 export class Todo {
@@ -16,7 +16,7 @@ export class Todo {
   @Column({ nullable: false })
   title: string;
 
-  @Column({ nullable: false })
+  @Column({ nullable: false, default: "TODO" })
   status: TodoStatus;
 
   @Column({ nullable: false })
@@ -41,13 +41,21 @@ export class Todo {
     nullable: true,
   })
   date_completed: Date;
-
-  static from(
+  /**
+   * Returns Todo
+   *
+   * @param title
+   * @param status
+   * @param priority
+   * @param deadline
+   * @returns The returns means insert from  RequestTodoDto to Todo
+   */
+  static createTodo(
     title: string,
     status: TodoStatus,
     priority: number,
     deadline: string
-  ) {
+  ): Todo {
     const todo = new Todo();
     todo.title = title;
     todo.status = status;
@@ -56,8 +64,14 @@ export class Todo {
 
     return todo;
   }
-
-  static update(todo: Todo, todoDto: RequestTodoDto): Todo {
+  /**
+   * Returns Todo
+   *
+   * @param todo
+   * @param todoDto
+   * @returns The returns means insert from  UpdateTodoDto to Todo
+   */
+  static updateTodo(todo: Todo, todoDto: UpdateTodoDto): Todo {
     todo.priority = todoDto.priority;
     todo.title = todoDto.title;
     todo.status = todoDto.status;

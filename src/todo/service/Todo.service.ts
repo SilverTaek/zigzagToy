@@ -4,25 +4,42 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { RequestTodoDto } from "../dto/RequestTodoDto";
 import { Todo } from "../entity/Todo.entity";
-import { TodoRepository } from "../repository/Todo.repository";
-import { Between, Like } from "typeorm";
+import { Between, Like, Repository } from "typeorm";
 import * as moment from "moment";
+import { ResponseTodoDto } from "../dto/ResponseTodoDto";
+import { OptionsType } from "../type/OptionsType";
+import { UpdateTodoDto } from "../dto/RequestUpdateTodoDto";
+import { TodoStatus } from "src/enum/Todo.enum";
 
 @Injectable()
 export class TodoService {
   constructor(
-    @InjectRepository(TodoRepository)
-    private todoRepository: TodoRepository
+    @InjectRepository(Todo)
+    private todoRepository: Repository<Todo>
   ) {}
-
-  registerTodo(todo: RequestTodoDto): Promise<Todo> {
-    return this.todoRepository.createTodo(todo);
+  /**
+   * Returns create Success created Todo Entity
+   *
+   * @param createTodo - Request Body by Todo
+   * @returns The returns mean of created Todo Entity
+   *
+   */
+  async registerTodo(createTodo: Todo): Promise<Todo> {
+    return await this.todoRepository.save(createTodo);
   }
-
-  async getTodos(query): Promise<Todo[]> {
-    const is_query_empty = Object.keys(query).length === 0;
+  /**
+   * Returns create Success message and created Todo Entity
+   *
+   * @param responseTodoDto - Request Query string After ResponseTodoDto
+   * @param is_query_empty - The parameter mean of query length
+   * @returns The returns mean of selectAll Todo Entity or Todo result search according to query
+   *
+   */
+  async getTodos(
+    responseTodoDto: ResponseTodoDto,
+    is_query_empty: boolean
+  ): Promise<Todo[]> {
     if (is_query_empty) {
       const todos = this.todoRepository.find({
         order: {
@@ -32,16 +49,14 @@ export class TodoService {
       return todos;
     }
 
-    const page: number = parseInt(query.page) || 1;
+    const page: number = responseTodoDto.page || 1;
 
-    const take: number = parseInt(query.take) || 10;
-    const options = TodoService.createWhere(query);
+    const take: number = responseTodoDto.take || 10;
+    const options: OptionsType = TodoService.createWhere(responseTodoDto);
 
-    type sort_type = 1 | "ASC" | "DESC" | -1;
+    const sort: string = responseTodoDto.sort;
 
-    let sort: sort_type = query.sort;
-
-    const result = await this.todoRepository.find({
+    const result: Todo[] = await this.todoRepository.find({
       where: options,
       take,
       skip: (page - 1) * take,
@@ -52,44 +67,68 @@ export class TodoService {
 
     return result;
   }
-
+  /**
+   * Returns create Success message and created Todo Entity
+   *
+   * @param id - Request Todo Id params
+   * @returns The returns mean of selectOne Todo Entity
+   *
+   */
   async getTodoOne(id: number): Promise<Todo> {
-    const find_todo = await this.todoRepository.findOne({
+    const find_todo: Todo | null = await this.todoRepository.findOne({
       where: { id },
     });
-    if (!find_todo) {
+
+    if (find_todo === null) {
       throw new NotFoundException("해당하는 Todo를 찾을 수 없습니다!");
     }
     return find_todo;
   }
-
-  async modifyTodo(id: number, todoDto: RequestTodoDto): Promise<Todo> {
-    const find_todo = await this.getTodoOne(id);
+  /**
+   * Returns create Success message and created Todo Entity
+   *
+   * @param id - Request Todo Id params
+   * @param todoDto - Request Body by UpdateTodoDto
+   * @returns The returns mean of updated Todo Entity
+   *
+   */
+  async modifyTodo(id: number, todoDto: UpdateTodoDto): Promise<Todo> {
+    const find_todo: Todo = await this.getTodoOne(id);
     if (find_todo.status === "DONE") {
-      throw new BadRequestException("완료 된 TODO는 수정 할 수 없습니다!");
+      throw new BadRequestException("DONE 상태의 Todo는 수정할 수 없습니다.");
     }
-    return this.todoRepository.updateTodo(find_todo, todoDto);
+    const todo: Todo = Todo.updateTodo(find_todo, todoDto);
+    return this.todoRepository.save(todo);
   }
-
+  /**
+   * Returns create Success message and created Todo Entity
+   *
+   * @param id - Request Todo Id params
+   * @returns void
+   *
+   */
   async removeTodo(id: number): Promise<void> {
-    const find_todo = await this.getTodoOne(id);
+    const find_todo: Todo = await this.getTodoOne(id);
     if (find_todo.status === "DONE") {
-      throw new BadRequestException("완료 된 TODO는 삭제 할 수 없습니다!");
+      throw new BadRequestException(" DONE 상태의 Todo를 삭제할 수 없습니다.");
     }
-    const result = await this.todoRepository.delete(id);
-    if (result.affected === 0) {
-      throw new NotFoundException("해당하는 Todo를 찾을 수 없습니다.");
-    }
+    await this.todoRepository.delete(id);
   }
-  // 조회를 위한 Where 절 생성 함수
-  static createWhere(query) {
-    const status = query.status as string;
-    const title = query.title as string;
-    const priority = query.priority as any;
-    const request_deadline = query.deadline as string;
-    const request_date_completed = query.date_completed as string;
+  /**
+   * Returns create Success message and created Todo Entity
+   *
+   * @param responseTodoDto - Request query string After ResponseTodoDto
+   * @returns The returns mean of options to use typeORM 'where' conditions
+   *
+   */
+  static createWhere(responseTodoDto: ResponseTodoDto): OptionsType {
+    const status: TodoStatus = responseTodoDto.status;
+    const title: string = responseTodoDto.title;
+    const priority: number = responseTodoDto.priority;
+    const request_deadline: string = responseTodoDto.deadline;
+    const request_date_completed: string = responseTodoDto.date_completed;
 
-    let options = {};
+    let options: OptionsType = {};
     if (status !== undefined) {
       options = {
         ...options,

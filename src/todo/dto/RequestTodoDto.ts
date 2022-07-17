@@ -1,36 +1,40 @@
-import { IsNotEmpty, IsNumber } from "class-validator";
-import { TodoStatus } from "src/common/Todo.enum";
+import {
+  IsEnum,
+  IsISO8601,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Matches,
+} from "class-validator";
+import { TodoStatus } from "src/enum/Todo.enum";
 import { Todo } from "../entity/Todo.entity";
 
 export class RequestTodoDto {
   @IsNotEmpty()
-  title: string;
+  @IsString()
+  readonly title: string;
+
   @IsNotEmpty()
   @IsNumber()
-  priority: number;
-  status: TodoStatus;
-  deadline: string;
+  readonly priority: number;
 
-  toTodoEntity() {
-    return Todo.from(this.title, this.status, this.priority, this.deadline);
-  }
+  @IsEnum(TodoStatus)
+  @IsOptional()
+  readonly status: TodoStatus;
 
-  static from(todo: RequestTodoDto) {
-    const todoDto = new RequestTodoDto();
-    todoDto.title = todo.title;
-    todoDto.status = todo.status;
-    todoDto.priority = todo.priority;
-    todoDto.deadline = todo.deadline;
+  @IsOptional()
+  @Matches(/^\d{4}(-)(((0)[0-9])|((1)[0-2]))(-)([0-2][0-9]|(3)[0-1])$/i, {
+    message: "$property must be formatted as yyyy-mm-dd",
+  })
+  readonly deadline: string;
 
-    return todoDto;
-  }
-
-  static updateEntity(todoDto: RequestTodoDto) {
-    const new_todo_dto = new RequestTodoDto();
-    new_todo_dto.title = todoDto.title;
-    new_todo_dto.status = todoDto.status;
-    new_todo_dto.priority = todoDto.priority;
-    new_todo_dto.deadline = todoDto.deadline;
-    return new_todo_dto;
+  toTodoEntity(): Todo {
+    return Todo.createTodo(
+      this.title,
+      this.status,
+      this.priority,
+      this.deadline
+    );
   }
 }

@@ -7,46 +7,117 @@ import {
   Post,
   Put,
   Query,
-  UsePipes,
-  ValidationPipe,
+  UseGuards,
 } from "@nestjs/common";
-import { TodoSelectValidationPipe } from "src/common/pipes/Todo.select.validation";
-import { TodoValidationPipe } from "src/common/pipes/Todo.create.validation";
 import { RequestTodoDto } from "../dto/RequestTodoDto";
 import { Todo } from "../entity/Todo.entity";
 import { TodoService } from "../service/Todo.service";
-import { TodoIdValidationPipe } from "src/common/pipes/Todo.id.validate";
+import { AuthService } from "src/auth/auth.service";
+import { JwtAuthGuard } from "src/auth/jwt/jwt.guard";
+import { ResponseEntity } from "../res/ResponseEntity";
+import { ResponseTodoDto } from "../dto/ResponseTodoDto";
+import { UpdateTodoDto } from "../dto/RequestUpdateTodoDto";
+import { ResponseType } from "../type/ResponseType";
 
 @Controller("todos")
 export class TodoController {
-  constructor(private todoService: TodoService) {}
+  constructor(
+    private readonly todoService: TodoService,
+    private readonly authService: AuthService
+  ) {}
 
+  /**
+   * Returns created jwt tokent
+   *
+   * @returns The returns mean of response created jwt
+   */
+  @Get("/token")
+  createToken() {
+    return this.authService.jwtCreate();
+  }
+
+  /**
+   * Returns create Success message and created Todo Entity
+   *
+   * @param requestTodoDto - Request Body
+   * @returns The returns mean of message and created Todo Entity
+   *
+   */
+  @UseGuards(JwtAuthGuard)
   @Post()
-  @UsePipes(ValidationPipe)
-  createTodo(@Body(TodoValidationPipe) todoDto: RequestTodoDto): Promise<Todo> {
-    return this.todoService.registerTodo(todoDto);
+  async createTodo(
+    @Body() requestTodoDto: RequestTodoDto
+  ): Promise<ResponseEntity<string>> {
+    const todo: Todo = await this.todoService.registerTodo(
+      requestTodoDto.toTodoEntity()
+    );
+    return ResponseEntity.OK("Todo 생성에 성공하였습니다", todo);
   }
-
+  /**
+   * Returns select Todo[] Entity
+   *
+   * @param responseTodoDto - Request query string After ResponseTodoDto
+   * @returns The returns mean of select Todo[]
+   *
+   */
+  @UseGuards(JwtAuthGuard)
   @Get()
-  selectTodos(@Query(TodoSelectValidationPipe) query): Promise<Todo[]> {
-    return this.todoService.getTodos(query);
-  }
+  async selectTodos(
+    @Query() responseTodoDto: ResponseTodoDto
+  ): Promise<ResponseEntity<ResponseType>> {
+    const is_query_empty: boolean = Object.keys(responseTodoDto).length === 0;
 
+    const todos: Todo[] = await this.todoService.getTodos(
+      responseTodoDto,
+      is_query_empty
+    );
+
+    return ResponseEntity.OK_WITH({
+      item_list: todos,
+      total_count: todos.length,
+    });
+  }
+  /**
+   * Returns select TodoOne
+   *
+   * @param id - Request Todo Id
+   * @returns The returns mean of select TodoById
+   *
+   */
+  @UseGuards(JwtAuthGuard)
   @Get("/:id")
-  selectTodoOne(@Param("id", TodoIdValidationPipe) id: number): Promise<Todo> {
-    return this.todoService.getTodoOne(id);
+  async selectTodoOne(
+    @Param("id") id: number
+  ): Promise<ResponseEntity<string>> {
+    const todo: Todo = await this.todoService.getTodoOne(id);
+    return ResponseEntity.OK("Todo 호출에 성공했습니다.", todo);
   }
-
+  /**
+   * Returns updated Todo Entity
+   *
+   * @param id - Request Todo Id
+   * @returns The returns mean of update Todo
+   *
+   */
+  @UseGuards(JwtAuthGuard)
   @Put("/:id")
-  updateTodo(
-    @Param("id", TodoIdValidationPipe) id: number,
-    @Body(TodoValidationPipe) todoDto: RequestTodoDto
-  ): Promise<Todo> {
-    return this.todoService.modifyTodo(id, todoDto);
+  async updateTodo(
+    @Param("id") id: number,
+    @Body() todoDto: UpdateTodoDto
+  ): Promise<ResponseEntity<string>> {
+    const todo: Todo = await this.todoService.modifyTodo(id, todoDto);
+    return ResponseEntity.OK("Todo 수정에 성공했습니다.", todo);
   }
-
+  /**
+   * Returns delete void
+   *
+   * @param id - Request Todo Id
+   * @returns void
+   *
+   */
+  @UseGuards(JwtAuthGuard)
   @Delete("/:id")
-  deleteTodo(@Param("id", TodoIdValidationPipe) id: number): Promise<void> {
-    return this.todoService.removeTodo(id);
+  async deleteTodo(@Param("id") id: number): Promise<void> {
+    await this.todoService.removeTodo(id);
   }
 }
