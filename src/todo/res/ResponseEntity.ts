@@ -1,6 +1,6 @@
-import { Todo } from "../entity/Todo.entity";
-import { ResponseType } from "../type/ResponseType";
-import { ResponseStatus } from "./ResponseStatus";
+import { Todo } from '../entity/Todo.entity';
+import { ResponseType } from '../type/ResponseType';
+import { ResponseStatus } from './ResponseStatus';
 
 export class ResponseEntity<T> {
   private readonly _statusCode: string;
@@ -10,7 +10,7 @@ export class ResponseEntity<T> {
   private constructor(
     status: ResponseStatus,
     message: string,
-    data: Todo | ResponseType
+    data: Todo | ResponseType,
   ) {
     this._statusCode = ResponseStatus[status];
     this._message = message;
@@ -20,11 +20,11 @@ export class ResponseEntity<T> {
   static OK(message: string, data: Todo): ResponseEntity<Todo> {
     return new ResponseEntity<string>(ResponseStatus.OK, message, data);
   }
-  static OK_WITH<T>(todo: ResponseType): ResponseEntity<ResponseType> {
+  static OK_WITH(todo: ResponseType): ResponseEntity<ResponseType> {
     return new ResponseEntity<ResponseType>(
       ResponseStatus.OK,
-      "성공적으로 호출했습니다.",
-      todo
+      '성공적으로 호출했습니다.',
+      todo,
     );
   }
 }

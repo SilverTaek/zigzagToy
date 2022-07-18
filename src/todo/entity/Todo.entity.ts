@@ -1,42 +1,44 @@
+import { Field, ObjectType } from '@nestjs/graphql';
+import { TodoStatus } from 'src/enum/Todo.enum';
 import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
   UpdateDateColumn,
-} from "typeorm";
-import { TodoStatus } from "../../enum/Todo.enum";
-import { UpdateTodoDto } from "../dto/RequestUpdateTodoDto";
-
+} from 'typeorm';
+import { UpdateTodoDto } from '../dto/RequestUpdateTodoDto';
+@ObjectType()
 @Entity()
 export class Todo {
+  @Field()
   @PrimaryGeneratedColumn()
   id: number;
-
+  @Field()
   @Column({ nullable: false })
   title: string;
-
-  @Column({ nullable: false, default: "TODO" })
+  @Field()
+  @Column({ nullable: false, default: 'TODO' })
   status: TodoStatus;
-
+  @Field()
   @Column({ nullable: false })
   priority: number;
-
+  @Field()
   @Column({ nullable: true })
   deadline: Date;
-
+  @Field()
   @CreateDateColumn({
     nullable: false,
-    type: "timestamp",
+    type: 'timestamp',
   })
   date_created: Date;
-
+  @Field()
   @UpdateDateColumn({
     nullable: false,
-    type: "timestamp",
+    type: 'timestamp',
   })
   date_updated: Date;
-
+  @Field()
   @Column({
     nullable: true,
   })
@@ -54,13 +56,13 @@ export class Todo {
     title: string,
     status: TodoStatus,
     priority: number,
-    deadline: string
+    deadline: string,
   ): Todo {
     const todo = new Todo();
     todo.title = title;
     todo.status = status;
     todo.priority = priority;
-    todo.deadline = new Date(deadline);
+    todo.deadline = deadline && new Date(deadline);
 
     return todo;
   }
@@ -76,7 +78,7 @@ export class Todo {
     todo.title = todoDto.title;
     todo.status = todoDto.status;
     todo.deadline = new Date(todoDto.deadline);
-    if (todoDto.status === "DONE") {
+    if (todoDto.status === 'DONE') {
       todo.date_completed = new Date();
     }
 

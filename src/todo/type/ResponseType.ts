@@ -1,4 +1,4 @@
-import { Todo } from "../entity/Todo.entity";
+import { Todo } from '../entity/Todo.entity';
 
 export interface ResponseType {
   item_list: Todo[];

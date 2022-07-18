@@ -1,5 +1,5 @@
-import { TodoStatus } from "src/enum/Todo.enum";
-import { FindOperator } from "typeorm";
+import { TodoStatus } from 'src/enum/Todo.enum';
+import { FindOperator } from 'typeorm';
 
 export interface OptionsType {
   status?: TodoStatus;

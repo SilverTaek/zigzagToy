@@ -1,0 +1,45 @@
+type Todo {
+  id: ID
+  title: String!
+  status: String
+  priority: Int!
+  deadline: String
+  date_created: String
+  date_updated: String
+  date_completed: String
+}
+
+type Mutation {
+  createTodo(createTodoInput: CreateTodoInput!): Todo!
+  updateTodo(updateTodoInput: UpdateTodoInput!): Todo!
+  removeTodo(id: Int!): Todo!
+}
+input CreateTodoInput {
+  title: String!
+  status: String
+  priority: Int!
+  deadline: String
+}
+
+input UpdateTodoInput {
+  id: Int!
+  title: String!
+  status: String
+  priority: Int!
+  deadline: String
+}
+
+type Query {
+  findAllTodo(responseTodo: ResponseTodo): [Todo!]!
+  findOneTodo(id: Int!): Todo!
+}
+input ResponseTodo {
+  title: String
+  status: String
+  priority: Int
+  deadline: String
+  date_completed: String
+  page: Int
+  take: Int
+  sort: String
+}
