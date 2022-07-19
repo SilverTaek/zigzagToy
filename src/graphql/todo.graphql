@@ -1,45 +1,169 @@
+scalar CrTimestamp
+"""
+할 일
+"""
 type Todo {
-  id: ID
+  """
+  기본 키
+  """
+  id: ID!
+  """
+  제목
+  """
   title: String!
-  status: String
+  """
+  상태
+  """
+  status: TodoStatusType
+  """
+  우선순위
+  """
   priority: Int!
+  """
+  마감일
+  """
   deadline: String
-  date_created: String
-  date_updated: String
-  date_completed: String
+  """
+  생성 일자
+  """
+  date_created: CrTimestamp!
+  """
+  변경 일자
+  """
+  date_updated: CrTimestamp!
+  """
+  완료 일자
+  """
+  date_completed: CrTimestamp
+}
+"""
+할 일 상태 타입
+"""
+enum TodoStatusType {
+  TODO
+  IN_PROGRESS
+  DONE
+}
+"""
+할 일 목록 및 요약 데이터
+"""
+type TodoList {
+  """
+  총목록 수
+  """
+  total_count: Int
+  """
+  할 일 목록
+  """
+  item_list: [Todo!]!
+}
+"""
+정렬 타입
+"""
+enum TodoOrderType {
+  ASC
+  DESC
+}
+type Query {
+  """
+  주어진 조건 모두에 일치하는 할 일을 받는다.
+  조건에 맞는 할 일이 없으면 null을 반환한다.
+  조건을 주지 않으면 null을 반환한다.
+  """
+  todo(id: ID): Todo
+  """
+  주어진 조건 모두에 일치하는 할 일 목록을 받는다.
+  조건을 주지 않으면 모든 할 일을 반환한다.
+  """
+  todo_list(responseTodo: ResponseTodo): TodoList!
+}
+
+"""
+createTodoList의 건별 입력
+"""
+input CreateTodoInput {
+  """
+  제목
+  """
+  title: String!
+  """
+  상태
+  """
+  status: TodoStatusType
+  """
+  우선순위
+  """
+  priority: Int!
+  """
+  마감일
+  """
+  deadline: String
+}
+"""
+updateTodoList의 건별 입력
+"""
+input UpdateTodoInput {
+  """
+  제목
+  """
+  title: String!
+  """
+  상태
+  """
+  status: TodoStatusType
+  """
+  우선순위
+  """
+  priority: Int!
+  """
+  마감일
+  """
+  deadline: String
+}
+"""
+todo_list의 조건 옵션
+"""
+input ResponseTodo {
+  """
+  제목
+  """
+  title: String
+  """
+  상태
+  """
+  status: TodoStatusType
+  """
+  우선순위
+  """
+  priority: Int
+  """
+  마감일
+  """
+  deadline: String
+  """
+  완료일
+  """
+  date_completed: CrTimestamp
+  """
+  페이지
+  """
+  page: Int
+  """
+  가지고 올 갯수
+  """
+  take: Int
+  """
+  정렬
+  """
+  sort: TodoOrderType
+}
+type Token {
+  token: String
 }
 
 type Mutation {
   createTodo(createTodoInput: CreateTodoInput!): Todo!
-  updateTodo(updateTodoInput: UpdateTodoInput!): Todo!
-  removeTodo(id: Int!): Todo!
-}
-input CreateTodoInput {
-  title: String!
-  status: String
-  priority: Int!
-  deadline: String
-}
-
-input UpdateTodoInput {
-  id: Int!
-  title: String!
-  status: String
-  priority: Int!
-  deadline: String
-}
-
-type Query {
-  findAllTodo(responseTodo: ResponseTodo): [Todo!]!
-  findOneTodo(id: Int!): Todo!
-}
-input ResponseTodo {
-  title: String
-  status: String
-  priority: Int
-  deadline: String
-  date_completed: String
-  page: Int
-  take: Int
-  sort: String
+  updateTodo(id: Int!, updateTodoInput: UpdateTodoInput!): Todo!
+  removeTodo(id: Int!): Boolean!
+  createToken: Token!
 }

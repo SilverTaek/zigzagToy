@@ -1,16 +1,16 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
-import { Repository, Between, Like } from 'typeorm';
-import { Todo } from './entity/Todo.entity';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ResponseTodoDto } from './dto/ResponseTodoDto';
-import { TodoStatus } from 'src/enum/Todo.enum';
-import { OptionsType } from './type/OptionsType';
 import moment from 'moment';
+import { TodoStatus } from 'src/enum/Todo.enum';
+import {
+  GraphQLTodoException,
+  GraphQLTodoStatusException,
+} from 'src/exception/GraphqlException';
+import { Repository, Between, Like } from 'typeorm';
 import { UpdateTodoDto } from './dto/RequestUpdateTodoDto';
+import { ResponseTodoDto } from './dto/ResponseTodoDto';
+import { Todo } from './entity/Todo.entity';
+import { OptionsType } from './type/OptionsType';
 @Injectable()
 export class TodoService {
   constructor(
@@ -60,7 +60,10 @@ export class TodoService {
     });
 
     if (find_todo === null) {
-      throw new NotFoundException('해당하는 Todo를 찾을 수 없습니다!');
+      throw new GraphQLTodoException(
+        '유효하지 않는 ID입니다!',
+        'Invalid Todo Id',
+      );
     }
     return find_todo;
   }
@@ -68,7 +71,10 @@ export class TodoService {
   async modifyTodo(id: number, updateTodo: UpdateTodoDto): Promise<Todo> {
     const find_todo: Todo = await this.getTodoOne(id);
     if (find_todo.status === 'DONE') {
-      throw new BadRequestException('DONE 상태의 Todo는 수정할 수 없습니다.');
+      throw new GraphQLTodoStatusException(
+        'DONE 상태의 Todo를 수정/삭제할 수 없습니다.',
+        'BadRequest',
+      );
     }
     const todo: Todo = Todo.updateTodo(find_todo, updateTodo);
     return this.todoRepository.save(todo);
@@ -77,7 +83,10 @@ export class TodoService {
   async removeTodo(id: number): Promise<void> {
     const find_todo: Todo = await this.getTodoOne(id);
     if (find_todo.status === 'DONE') {
-      throw new BadRequestException(' DONE 상태의 Todo를 삭제할 수 없습니다.');
+      throw new GraphQLTodoStatusException(
+        ' DONE 상태의 Todo를 수정/삭제할 수 없습니다.',
+        'BadRequest',
+      );
     }
     await this.todoRepository.delete(id);
   }

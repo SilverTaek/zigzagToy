@@ -1,64 +1,78 @@
+import { UseGuards } from '@nestjs/common';
 import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
+import { AuthService } from 'src/auth/auth.service';
+import { GqlAuthGuard } from 'src/auth/gql.guard';
 import { RequestTodoDto } from './dto/RequestTodoDto';
 import { UpdateTodoDto } from './dto/RequestUpdateTodoDto';
 import { ResponseTodoDto } from './dto/ResponseTodoDto';
 import { Todo } from './entity/Todo.entity';
-import { ResponseEntity } from './res/ResponseEntity';
 import { TodoService } from './todo.service';
+import { TodoListType } from './type/TodoListType';
 
 @Resolver(() => Todo)
 export class TodoResolver {
-  constructor(private readonly todoService: TodoService) {}
+  constructor(
+    private readonly todoService: TodoService,
+    private readonly authService: AuthService,
+  ) {}
 
+  @Mutation()
+  createToken() {
+    return this.authService.jwtCreate();
+  }
+  @UseGuards(GqlAuthGuard)
   @Mutation(() => Todo, { name: 'createTodo' })
   async createTodo(
     @Args('createTodoInput') requestTodoDto: RequestTodoDto,
   ): Promise<Todo> {
-    console.log(requestTodoDto.toTodoEntity());
     const todo: Todo = await this.todoService.registerTodo(
       requestTodoDto.toTodoEntity(),
     );
 
     return todo;
   }
-
-  @Query(() => [Todo], { name: 'findAllTodo' })
+  @UseGuards(GqlAuthGuard)
+  @Query(() => [Todo], { name: 'todo_list' })
   async selectTodos(
     @Args('responseTodo') responseTodoDto: ResponseTodoDto,
-  ): Promise<ResponseEntity<ResponseType>> {
+  ): Promise<TodoListType> {
     const is_query_empty: boolean = Object.keys(responseTodoDto).length === 0;
 
     const todos: Todo[] = await this.todoService.getTodos(
       responseTodoDto,
       is_query_empty,
     );
-    return ResponseEntity.OK_WITH({
-      item_list: todos,
+    const todo_list: TodoListType = {
       total_count: todos.length,
-    });
-  }
+      item_list: todos,
+    };
 
-  @Query(() => Todo, { name: 'findOneTodo' })
+    return todo_list;
+  }
+  @UseGuards(GqlAuthGuard)
+  @Query(() => Todo, { name: 'todo' })
   async selectTodoOne(
     @Args('id', { type: () => Int }) id: number,
-  ): Promise<ResponseEntity<string>> {
+  ): Promise<Todo> {
     const todo: Todo = await this.todoService.getTodoOne(id);
-    return ResponseEntity.OK('Todo 호출에 성공했습니다.', todo);
+    return todo;
   }
-
-  @Mutation(() => Todo)
+  @UseGuards(GqlAuthGuard)
+  @Mutation(() => Todo, { name: 'updateTodo' })
   async updateTodo(
+    @Args('id') id: number,
     @Args('updateTodoInput') updateTodoDto: UpdateTodoDto,
-  ): Promise<ResponseEntity<string>> {
-    const todo: Todo = await this.todoService.modifyTodo(
-      updateTodoDto.id,
-      updateTodoDto,
-    );
-    return ResponseEntity.OK('Todo 수정에 성공했습니다.', todo);
+  ): Promise<Todo> {
+    console.log(updateTodoDto);
+    const todo: Todo = await this.todoService.modifyTodo(id, updateTodoDto);
+    return todo;
   }
-
-  @Mutation(() => Todo)
-  removeTodo(@Args('id', { type: () => Int }) id: number): Promise<void> {
-    return this.todoService.removeTodo(id);
+  @UseGuards(GqlAuthGuard)
+  @Mutation()
+  async removeTodo(
+    @Args('id', { type: () => Int }) id: number,
+  ): Promise<boolean> {
+    await this.todoService.removeTodo(id);
+    return true;
   }
 }

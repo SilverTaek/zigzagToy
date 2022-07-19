@@ -1,5 +1,5 @@
-import { ArgumentsHost, Catch } from "@nestjs/common";
-import { BaseExceptionFilter } from "@nestjs/core";
+import { ArgumentsHost, Catch } from '@nestjs/common';
+import { BaseExceptionFilter } from '@nestjs/core';
 
 @Catch()
 export class AllExceptionsFilter extends BaseExceptionFilter {
