@@ -1,8 +1,8 @@
-import { TodoStatus } from 'src/enum/Todo.enum';
+import { TodoStatusType } from 'src/types/graphql';
 import { FindOperator } from 'typeorm';
 
 export interface OptionsType {
-  status?: TodoStatus;
+  status?: TodoStatusType;
   title?: FindOperator<string>;
   priority?: number;
   deadline?: FindOperator<Date>;

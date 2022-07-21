@@ -1,5 +1,5 @@
 {
-  "name": "Assignment5",
+  "name": "Assignment-5-GrapQL",
   "version": "0.0.1",
   "description": "",
   "author": "",
@@ -13,6 +13,7 @@
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
+    "generate": "graphql-codegen",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -45,6 +46,9 @@
     "typeorm": "^0.3.7"
   },
   "devDependencies": {
+    "@graphql-codegen/cli": "^2.9.0",
+    "@graphql-codegen/typescript": "^2.7.2",
+    "@graphql-codegen/typescript-resolvers": "^2.7.2",
     "@croquiscom/eslint-config": "^1.9.0",
     "@nestjs/cli": "^9.0.0",
     "@nestjs/schematics": "^9.0.0",

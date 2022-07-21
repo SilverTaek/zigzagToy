@@ -1,33 +1,33 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import moment from 'moment';
-import { TodoStatus } from 'src/enum/Todo.enum';
 import {
   GraphQLTodoException,
   GraphQLTodoStatusException,
 } from 'src/exception/GraphqlException';
+import { TodoStatusType } from 'src/types/graphql';
 import { Repository, Between, Like } from 'typeorm';
 import { UpdateTodoDto } from './dto/RequestUpdateTodoDto';
 import { ResponseTodoDto } from './dto/ResponseTodoDto';
-import { Todo } from './entity/Todo.entity';
+import { TodoEntity } from './entity/Todo.entity';
 import { OptionsType } from './type/OptionsType';
 @Injectable()
 export class TodoService {
   constructor(
-    @InjectRepository(Todo)
-    private todoRepository: Repository<Todo>,
+    @InjectRepository(TodoEntity)
+    private todoRepository: Repository<TodoEntity>,
   ) {}
 
-  async registerTodo(createTodo: Todo): Promise<Todo> {
+  async registerTodo(createTodo: TodoEntity): Promise<TodoEntity> {
     return await this.todoRepository.save(createTodo);
   }
 
   async getTodos(
     responseTodoDto: ResponseTodoDto,
     is_query_empty: boolean,
-  ): Promise<Todo[]> {
+  ): Promise<TodoEntity[]> {
     if (is_query_empty) {
-      const todos = this.todoRepository.find({
+      const todos = await this.todoRepository.find({
         order: {
           priority: 'ASC',
         },
@@ -42,7 +42,7 @@ export class TodoService {
 
     const sort: string = responseTodoDto.sort;
 
-    const result: Todo[] = await this.todoRepository.find({
+    const result: TodoEntity[] = await this.todoRepository.find({
       where: options,
       take,
       skip: (page - 1) * take,
@@ -54,8 +54,8 @@ export class TodoService {
     return result;
   }
 
-  async getTodoOne(id: number): Promise<Todo> {
-    const find_todo: Todo | null = await this.todoRepository.findOne({
+  async getTodoOne(id: number): Promise<TodoEntity> {
+    const find_todo: TodoEntity | null = await this.todoRepository.findOne({
       where: { id },
     });
 
@@ -68,20 +68,20 @@ export class TodoService {
     return find_todo;
   }
 
-  async modifyTodo(id: number, updateTodo: UpdateTodoDto): Promise<Todo> {
-    const find_todo: Todo = await this.getTodoOne(id);
+  async modifyTodo(id: number, updateTodo: UpdateTodoDto): Promise<TodoEntity> {
+    const find_todo: TodoEntity = await this.getTodoOne(id);
     if (find_todo.status === 'DONE') {
       throw new GraphQLTodoStatusException(
         'DONE 상태의 Todo를 수정/삭제할 수 없습니다.',
         'BadRequest',
       );
     }
-    const todo: Todo = Todo.updateTodo(find_todo, updateTodo);
+    const todo: TodoEntity = TodoEntity.updateTodo(find_todo, updateTodo);
     return this.todoRepository.save(todo);
   }
 
   async removeTodo(id: number): Promise<void> {
-    const find_todo: Todo = await this.getTodoOne(id);
+    const find_todo: TodoEntity = await this.getTodoOne(id);
     if (find_todo.status === 'DONE') {
       throw new GraphQLTodoStatusException(
         ' DONE 상태의 Todo를 수정/삭제할 수 없습니다.',
@@ -91,7 +91,7 @@ export class TodoService {
     await this.todoRepository.delete(id);
   }
   static createWhere(responseTodoDto: ResponseTodoDto): OptionsType {
-    const status: TodoStatus = responseTodoDto.status;
+    const status: TodoStatusType = responseTodoDto.status;
     const title: string = responseTodoDto.title;
     const priority: number = responseTodoDto.priority;
     const request_deadline: string = responseTodoDto.deadline;

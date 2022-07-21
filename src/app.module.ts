@@ -7,6 +7,10 @@ import { TodoModule } from './todo/todo.module';
 import { CrTimestamp } from '@croquiscom/crary-graphql';
 import { AuthModule } from './auth/auth.module';
 
+const NODE_ENV = {
+  product: 'PRODUCT',
+  dev: 'DEV',
+};
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -32,7 +36,8 @@ import { AuthModule } from './auth/auth.module';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
         const resolvers = { CrTimestamp };
-        const debug: boolean = configService.get<string>('NODE_ENV') !== 'DEV';
+        const debug: boolean =
+          configService.get<string>('NODE_ENV') !== NODE_ENV.dev;
         return { typePaths: ['./**/*.graphql'], resolvers, debug };
       },
     }),

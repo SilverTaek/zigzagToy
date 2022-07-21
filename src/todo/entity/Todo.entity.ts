@@ -1,6 +1,4 @@
-import { Field, ObjectType } from '@nestjs/graphql';
-
-import { TodoStatus } from 'src/enum/Todo.enum';
+import { TodoStatusType } from 'src/types/graphql';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -9,37 +7,36 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { UpdateTodoDto } from '../dto/RequestUpdateTodoDto';
-@ObjectType()
+
 @Entity()
-export class Todo {
-  @Field()
+export class TodoEntity {
   @PrimaryGeneratedColumn()
   id: number;
-  @Field()
+
   @Column({ nullable: false })
   title: string;
-  @Field()
+
   @Column({ nullable: false, default: 'TODO' })
-  status: TodoStatus;
-  @Field()
+  status: TodoStatusType;
+
   @Column({ nullable: false })
   priority: number;
-  @Field()
+
   @Column({ nullable: true })
   deadline: Date;
-  @Field()
+
   @CreateDateColumn({
     nullable: false,
     type: 'timestamp',
   })
   date_created: Date;
-  @Field()
+
   @UpdateDateColumn({
     nullable: false,
     type: 'timestamp',
   })
   date_updated: Date;
-  @Field()
+
   @Column({
     nullable: true,
   })
@@ -55,11 +52,11 @@ export class Todo {
    */
   static createTodo(
     title: string,
-    status: TodoStatus,
+    status: TodoStatusType,
     priority: number,
     deadline: string,
-  ): Todo {
-    const todo = new Todo();
+  ): TodoEntity {
+    const todo = new TodoEntity();
     todo.title = title;
     todo.status = status;
     todo.priority = priority;
@@ -74,7 +71,7 @@ export class Todo {
    * @param todoDto
    * @returns The returns means insert from  UpdateTodoDto to Todo
    */
-  static updateTodo(todo: Todo, todoDto: UpdateTodoDto): Todo {
+  static updateTodo(todo: TodoEntity, todoDto: UpdateTodoDto): TodoEntity {
     todo.priority = todoDto.priority;
     todo.title = todoDto.title;
     todo.status = todoDto.status;

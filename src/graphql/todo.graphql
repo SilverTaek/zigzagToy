@@ -6,7 +6,7 @@ type Todo {
   """
   기본 키
   """
-  id: ID!
+  id: Int!
   """
   제목
   """
@@ -22,7 +22,7 @@ type Todo {
   """
   마감일
   """
-  deadline: String
+  deadline: CrTimestamp
   """
   생성 일자
   """
@@ -157,13 +157,28 @@ input ResponseTodo {
   """
   sort: TodoOrderType
 }
+"""
+토큰
+"""
 type Token {
   token: String
 }
 
 type Mutation {
+  """
+  Todo 생성 및 생성 된 Todo 반환
+  """
   createTodo(createTodoInput: CreateTodoInput!): Todo!
+  """
+  Todo 변경 및 변경 된 Todo 반환
+  """
   updateTodo(id: Int!, updateTodoInput: UpdateTodoInput!): Todo!
+  """
+  Todo 삭제 및 정상 삭제 시 true 반환
+  """
   removeTodo(id: Int!): Boolean!
+  """
+  JWT 생성 및 JWT 반환
+  """
   createToken: Token!
 }
